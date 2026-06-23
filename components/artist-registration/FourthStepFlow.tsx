@@ -1,14 +1,54 @@
+"use client";
+
 import convertEnNumberToFaNumberWithSeparation from "@/lib/utils/convertEnNumberToFaNumberWithSeparation";
 import { Card } from "@dgshahr/ui-kit";
 import Button from "../common/Button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useArtistRegistrationStore } from "@/lib/stores/useUserArtist";
+import { useUserCreateArtistRequest } from "@/lib/services/landing/hook";
+
+const PAYMENT_AMOUNT = 200000;
 
 interface Props {
   onNext: () => void;
   onPrevious: () => void;
 }
 
-const FourthStepFlow: React.FC<Props> = ({ onNext, onPrevious }) => {
+const FourthStepFlow: React.FC<Props> = ({ onPrevious }) => {
+  const store = useArtistRegistrationStore();
+  const { mutate, isPending } = useUserCreateArtistRequest();
+
+  const handlePay = () => {
+    mutate(
+      {
+        categoryIds: store.categoryId,
+        firstName: store.firstName || undefined,
+        lastName: store.lastName || undefined,
+        height: store.height ?? undefined,
+        weight: store.weight ?? undefined,
+        language: store.language || undefined,
+        dialect: store.dialect || undefined,
+        email: store.email || undefined,
+        address: store.address || undefined,
+        province: store.province || undefined,
+        city: store.city || undefined,
+        postalCode: store.postalCode || undefined,
+        education: store.education || undefined,
+        major: store.major || undefined,
+        avatar: store.avatar || undefined,
+        birthDate: store.birthDate || undefined,
+        gender: store.gender || undefined,
+        aboutMe: store.aboutMe || undefined,
+        portfolios: store.portfolios.length ? store.portfolios : undefined,
+      },
+      {
+        onSuccess: (res) => {
+          window.location.href = `http://api.archivehonar.ir/api/user/purchase/?amount=${PAYMENT_AMOUNT}&requestId=${res.result.artistRequestId}`;
+        },
+      },
+    );
+  };
+
   return (
     <Card wrapperClassName="w-3/4" className="pt-16">
       <div className="flex flex-col gap-10">
@@ -29,7 +69,7 @@ const FourthStepFlow: React.FC<Props> = ({ onNext, onPrevious }) => {
               <p className="font-p2-medium">مبلغ قابل پرداخت</p>
               <div className="flex gap-1">
                 <p className="font-p2-medium">
-                  {convertEnNumberToFaNumberWithSeparation(200000)}
+                  {convertEnNumberToFaNumberWithSeparation(PAYMENT_AMOUNT)}
                 </p>
                 <p className="font-p2-medium">تومان</p>
               </div>
@@ -42,6 +82,7 @@ const FourthStepFlow: React.FC<Props> = ({ onNext, onPrevious }) => {
             rightIcon={<ChevronRight />}
             className="rounded-full! px-10"
             onClick={onPrevious}
+            disabled={isPending}
           >
             مرحله قبل
           </Button>
@@ -49,7 +90,9 @@ const FourthStepFlow: React.FC<Props> = ({ onNext, onPrevious }) => {
           <Button
             leftIcon={<ChevronLeft />}
             className="rounded-full! px-10"
-            onClick={onNext}
+            onClick={handlePay}
+            isLoading={isPending}
+            disabled={isPending}
           >
             پرداخت و ثبت‌نام نهایی
           </Button>

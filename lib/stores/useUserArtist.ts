@@ -31,6 +31,7 @@ interface ArtistRegistrationState {
   major: string;
   portfolios: Portfolio[];
   avatar: string;
+  aboutMe: string;
 
   // Step Actions
   handleNext: () => void;
@@ -71,6 +72,7 @@ const initialState = {
   major: "",
   portfolios: [] as Portfolio[],
   avatar: "",
+  aboutMe: "",
 };
 
 export const useArtistRegistrationStore = create<ArtistRegistrationState>(

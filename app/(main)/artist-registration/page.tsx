@@ -7,6 +7,7 @@ import { MoveLeft } from "lucide-react";
 import AtristRegistrationFlow from "@/components/artist-registration/AtristRegistrationFlow";
 import { artistCategories } from "@/lib/mock/artists";
 import { splitPattern } from "@/lib/utils/split-pattern";
+import { useArtistRegistrationStore } from "@/lib/stores/useUserArtist";
 
 export interface SelectedCategory {
   id: number;
@@ -20,7 +21,11 @@ export default function ArtistRegistrationPage() {
   const [selectedCategory, setSelectedCategory] =
     useState<SelectedCategory | null>(null);
 
+  const { setField, reset } = useArtistRegistrationStore();
+
   const handleSelectCategory = (id: number, title: string) => {
+    reset();
+    setField("categoryId", [id]);
     setSelectedCategory({ id, title });
     setStep(1);
   };
@@ -33,6 +38,7 @@ export default function ArtistRegistrationPage() {
     if (step === 1) {
       setStep(0);
       setSelectedCategory(null);
+      reset();
     } else {
       setStep((prev) => prev - 1);
     }
