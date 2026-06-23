@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   IAboutUsResponse,
+  IArtistRetriveResponse,
   IFaqListResponse,
   IProvinceListResponse,
   IRetriveResponse,
@@ -24,6 +25,8 @@ import {
   UserUpdateProfile,
 } from "./type";
 import {
+  getUserArtistDetail,
+  updateUserArtistRequest,
   userAboutUs,
   userArtistRequests,
   userArtsitList,
@@ -179,3 +182,20 @@ export const useUserCreateArtistRequest = () =>
   useMutation<{ result: ArtistRequestResult }, AxiosError, UserCreateArtistRequest>({
     mutationFn: userCreateArtistRequest,
   });
+
+export const useUserArtistDetail = (id?: number) =>
+  useQuery<IArtistRetriveResponse>({
+    queryKey: ["userArtistDetail", id],
+    queryFn: () => getUserArtistDetail(id!),
+    enabled: !!id,
+    refetchInterval: 30 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+export const useUpdateUserArtistRequest = () => {
+  const { accessToken } = useAuthStore();
+  return useMutation({
+    mutationFn: ({ id, ...payload }: { id: number } & Partial<UserCreateArtistRequest>) =>
+      updateUserArtistRequest(id, payload, accessToken),
+  });
+};

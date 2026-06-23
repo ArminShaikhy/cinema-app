@@ -1,5 +1,6 @@
 import {
   IAboutUsResponse,
+  IArtistRetriveResponse,
   IFaqListResponse,
   IProvinceListResponse,
   IRetriveResponse,
@@ -164,6 +165,26 @@ export const userCreateArtistRequest = async (
   const { data } = await landingApi.post<{ result: ArtistRequestResult }>(
     "/user/artist-requests",
     payload,
+  );
+  return data;
+};
+
+export const getUserArtistDetail = async (id: number) => {
+  const { data } = await landingApi.get<IArtistRetriveResponse>(
+    `/artists-requests/${id}/`,
+  );
+  return data;
+};
+
+export const updateUserArtistRequest = async (
+  id: number,
+  payload: Partial<UserCreateArtistRequest>,
+  accessToken: string,
+) => {
+  const { data } = await landingApi.patch<{ result: ArtistRequestResult }>(
+    `/user/artist-requests/${id}/`,
+    payload,
+    { headers: { Authorization: accessToken } },
   );
   return data;
 };
