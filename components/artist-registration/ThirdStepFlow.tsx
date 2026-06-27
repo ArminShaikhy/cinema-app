@@ -16,16 +16,16 @@ const ThirdStepFlow: React.FC<Props> = ({ onNext, onPrevious }) => {
   const uploadImage = useUserUploadAvatar();
   const uploadVideo = useUserUploadVideo();
 
-  const handleImageUpload = (files: File[]) => {
-    if (!files[0]) return;
-    uploadImage.mutate(files[0], {
+  const handleImageUpload = (file: File | undefined) => {
+    if (!file) return;
+    uploadImage.mutate(file, {
       onSuccess: (res) => store.addPortfolio({ path: res.path, type: "IMAGE" }),
     });
   };
 
-  const handleVideoUpload = (files: File[]) => {
-    if (!files[0]) return;
-    uploadVideo.mutate(files[0], {
+  const handleVideoUpload = (file: File | undefined) => {
+    if (!file) return;
+    uploadVideo.mutate(file, {
       onSuccess: (res) => store.addPortfolio({ path: res.path, type: "VIDEO" }),
     });
   };

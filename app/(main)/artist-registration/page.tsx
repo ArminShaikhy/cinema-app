@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Card } from "@dgshahr/ui-kit";
@@ -16,7 +16,7 @@ export interface SelectedCategory {
   title: string;
 }
 
-export default function ArtistRegistrationPage() {
+function ArtistRegistrationPageContent() {
   const rows = splitPattern(artistCategories);
   const searchParams = useSearchParams();
   const editIdParam = searchParams.get("editId");
@@ -138,5 +138,13 @@ export default function ArtistRegistrationPage() {
         />
       )}
     </>
+  );
+}
+
+export default function ArtistRegistrationPage() {
+  return (
+    <Suspense fallback={null}>
+      <ArtistRegistrationPageContent />
+    </Suspense>
   );
 }

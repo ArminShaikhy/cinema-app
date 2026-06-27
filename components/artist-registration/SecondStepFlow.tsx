@@ -47,9 +47,9 @@ const SecondStepFlow: React.FC<Props> = ({ onNext, onPrevious }) => {
   const cityOptions =
     citiesData?.result?.map((c) => ({ label: c.name, value: c.name })) ?? [];
 
-  const handleAvatarChange = (files: File[]) => {
-    if (!files[0]) return;
-    uploadAvatar.mutate(files[0], {
+  const handleAvatarChange = (file: File | undefined) => {
+    if (!file) return;
+    uploadAvatar.mutate(file, {
       onSuccess: (res) => store.setField("avatar", res.path),
     });
   };
@@ -189,15 +189,14 @@ const SecondStepFlow: React.FC<Props> = ({ onNext, onPrevious }) => {
               placeholder: "استان خود را انتخاب کنید",
               required: true,
             }}
-            value={store.province ? { label: store.province, value: store.province } : null}
+            value={store.province || null}
             options={provinceOptions}
             wrapperClassName="w-full"
-            onChange={(opt) => {
-              const selected = opt as { label: string; value: string } | null;
-              store.setField("province", selected?.value ?? "");
+            onChange={(selected) => {
+              store.setField("province", selected ?? "");
               store.setField("city", "");
               const found = provincesData?.result?.find(
-                (p) => p.name === selected?.value,
+                (p) => p.name === selected,
               );
               setSelectedProvinceId(found?.id ?? 0);
             }}
@@ -209,12 +208,11 @@ const SecondStepFlow: React.FC<Props> = ({ onNext, onPrevious }) => {
               placeholder: "شهر خود را انتخاب کنید",
               required: true,
             }}
-            value={store.city ? { label: store.city, value: store.city } : null}
+            value={store.city || null}
             options={cityOptions}
             wrapperClassName="w-full"
-            onChange={(opt) => {
-              const selected = opt as { label: string; value: string } | null;
-              store.setField("city", selected?.value ?? "");
+            onChange={(selected) => {
+              store.setField("city", selected ?? "");
             }}
             mode="single"
           />
@@ -240,16 +238,11 @@ const SecondStepFlow: React.FC<Props> = ({ onNext, onPrevious }) => {
               placeholder: "تحصیلات خود را انتخاب کنید",
               required: true,
             }}
-            value={
-              store.education
-                ? { label: store.education, value: store.education }
-                : null
-            }
+            value={store.education || null}
             wrapperClassName="w-full"
             options={EDUCATION_OPTIONS}
-            onChange={(opt) => {
-              const selected = opt as { label: string; value: string } | null;
-              store.setField("education", selected?.value ?? "");
+            onChange={(selected) => {
+              store.setField("education", selected ?? "");
             }}
             mode="single"
           />
