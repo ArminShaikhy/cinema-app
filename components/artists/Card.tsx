@@ -12,7 +12,7 @@ export default function ArtistCard({
     >
       <div className="w-full h-27 rounded-lg bg-zinc-800 mb-4"></div>
       <div className="text-base font-semibold text-zinc-100 group-hover:text-red-300 mb-2">
-        {`${artist.user.firstName} ${artist.user.lastName}`}
+        {`${artist.user.firstName ?? 'نام'} ${artist.user.lastName ?? 'نام خانوادگی'}`}
       </div>
       <div className="mt-2 flex flex-wrap gap-2 text-xs">
         <span className="rounded-full bg-zinc-500 px-2 py-1 text-zinc-100 ring-1 ring-zinc-800">

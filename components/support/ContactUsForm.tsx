@@ -137,7 +137,7 @@ const ContactUsForm = () => {
           />
         </div>
 
-        <div className="flex gap-2 w-full">
+        <div className="flex gap-2 w-full flex-wrap">
           <Select
             inputProps={{
               labelContent: "دسته بندی اصلی",
