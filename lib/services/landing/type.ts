@@ -122,6 +122,7 @@ export type UserCreateArtistRequest = {
   birthDate?: string;
   gender?: "MAN" | "WOMAN";
   aboutMe?: string;
+  sampleType: ESampleType;
   portfolios?: { path: string; type: PortfolioType }[];
 };
 
