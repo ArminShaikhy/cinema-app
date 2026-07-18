@@ -57,6 +57,7 @@ export interface IUserCaategoryItem {
   enName: string | null;
   faName: string;
   id: number;
+  image: string | null;
   isActive: boolean;
   priority: number;
   updatedAt: string | null;
@@ -70,6 +71,7 @@ export interface IUserCategoryResponse {
   enName: string | null;
   faName: string;
   id: number;
+  image: string | null;
   isActive: boolean;
   priority: number;
   updatedAt: string | null;

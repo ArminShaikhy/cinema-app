@@ -11,6 +11,7 @@ import {
   IBannerUpsertRequest,
   ICategoryRetriveResponse,
   ICatrgotyListResponse,
+  ICreateCategoryRequest,
   ICreateFormFieldRequest,
   ICreateFormStepRequest,
   IFaqItem,
@@ -49,6 +50,8 @@ import {
   adminBannerList,
   adminBannerRetrieve,
   adminBannerUpdate,
+  adminCategoryCreate,
+  adminCategoryDelete,
   adminCategoryList,
   adminCategoryRetrieve,
   adminCategoryUpdate,
@@ -250,6 +253,23 @@ export const useAdminCategoryUpdate = () => {
   return useMutation({
     mutationFn: (data: { id: number; payload: IUpdateCategoryRequest }) =>
       adminCategoryUpdate(data.id, data.payload, accessToken),
+  });
+};
+
+export const useAdminCategoryCreate = () => {
+  const { accessToken } = useAdminAuthStore();
+
+  return useMutation({
+    mutationFn: (payload: ICreateCategoryRequest) =>
+      adminCategoryCreate(payload, accessToken),
+  });
+};
+
+export const useAdminCategoryDelete = () => {
+  const { accessToken } = useAdminAuthStore();
+
+  return useMutation({
+    mutationFn: (id: number) => adminCategoryDelete(id, accessToken),
   });
 };
 

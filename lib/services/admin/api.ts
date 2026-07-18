@@ -10,6 +10,7 @@ import {
   IBannerUpsertRequest,
   ICategoryRetriveResponse,
   ICatrgotyListResponse,
+  ICreateCategoryRequest,
   ICreateFormFieldRequest,
   ICreateFormStepRequest,
   IFaqItem,
@@ -74,6 +75,28 @@ export const adminCategoryUpdate = async (
       Authorization: accessToken,
     },
   });
+
+  return data;
+};
+
+export const adminCategoryCreate = async (
+  payload: ICreateCategoryRequest,
+  accessToken: string,
+) => {
+  const { data } = await api.post<ICategoryRetriveResponse>(
+    "/admin/categories",
+    payload,
+    { headers: { Authorization: accessToken } },
+  );
+
+  return data;
+};
+
+export const adminCategoryDelete = async (id: number, accessToken: string) => {
+  const { data } = await api.delete<IRetriveResponse<null>>(
+    `/admin/categories/${id}`,
+    { headers: { Authorization: accessToken } },
+  );
 
   return data;
 };

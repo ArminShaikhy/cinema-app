@@ -19,17 +19,46 @@ import {
 } from "@/lib/services/admin/type";
 import withNoSSR from "@/lib/utils/withNoSSR";
 import { Button, Card, Checkbox, Divider, Input, Select } from "@dgshahr/ui-kit";
-import { ChevronDown, ChevronRight, ChevronUp, Plus, Trash2 } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  CreditCard,
+  LayoutGrid,
+  List,
+  Plus,
+  Trash2,
+  UserRound,
+} from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
+const FIELD_TYPE_LABELS: Record<EFormFieldType, string> = {
+  [EFormFieldType.TEXT]: "متن کوتاه",
+  [EFormFieldType.TEXTAREA]: "متن بلند",
+  [EFormFieldType.NUMBER]: "عدد",
+  [EFormFieldType.SELECT]: "لیست کشویی",
+  [EFormFieldType.RADIO]: "تک انتخابی",
+  [EFormFieldType.CHECKBOX]: "چند انتخابی",
+  [EFormFieldType.DATE]: "تاریخ",
+  [EFormFieldType.IMAGE]: "تصویر",
+  [EFormFieldType.VIDEO]: "ویدئو",
+};
+
 const FIELD_TYPE_OPTIONS = Object.values(EFormFieldType).map((type) => ({
-  label: type,
+  label: FIELD_TYPE_LABELS[type],
   value: type,
 }));
 
-const ICON_OPTIONS = ["LayoutGrid", "UserRound", "List", "CreditCard"].map((i) => ({
+const ICON_COMPONENTS: Record<string, typeof LayoutGrid> = {
+  LayoutGrid,
+  UserRound,
+  List,
+  CreditCard,
+};
+
+const ICON_OPTIONS = Object.keys(ICON_COMPONENTS).map((i) => ({
   label: i,
   value: i,
 }));
@@ -196,6 +225,14 @@ function StepCard({
             inputProps={{ labelContent: "آیکون" }}
             value={step.icon ?? null}
             options={ICON_OPTIONS}
+            optionCell={(option, isActive) => {
+              const Icon = ICON_COMPONENTS[option.value];
+              return (
+                <span className={`flex items-center ${isActive ? "text-primary-500" : ""}`}>
+                  <Icon size={16} />
+                </span>
+              );
+            }}
             onChange={(v) =>
               updateStep({ stepId: step.id, payload: { icon: v ?? undefined } }, { onSuccess: onChanged })
             }

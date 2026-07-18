@@ -187,6 +187,7 @@ export interface ICategoryItem {
   enName: string;
   faName: string;
   id: number;
+  image: string | null;
   isActive: boolean;
   updatedAt: string | null;
   priority: number | null;
@@ -250,6 +251,17 @@ export interface IUpdateCategoryRequest {
   isActive: boolean;
   description: string;
   priority: number | null;
+  image?: string | null;
+}
+
+export interface ICreateCategoryRequest {
+  faName: string;
+  enName: string;
+  parentId?: number | null;
+  description?: string;
+  priority?: number | null;
+  isActive?: boolean;
+  image?: string | null;
 }
 
 export interface IFaqItem {
