@@ -16,7 +16,6 @@ import { TutorialSection } from "@/components/home/TutorialSection";
 import { MainTutorialVideo } from "@/components/home/MainTutorialVideo";
 import { IArtistItem } from "@/lib/services/admin/type";
 import { useArtistRegistrationStore } from "@/lib/stores/useUserArtist";
-import { useArtistFilterStore } from "@/lib/stores/useArtistFilter";
 
 const BANNER_GRADIENTS = [
   "from-zinc-950 via-amber-950/50 to-zinc-900",
@@ -27,7 +26,6 @@ const BANNER_GRADIENTS = [
 export default function ApplicationPage() {
   const router = useRouter();
   const { setSelectedCategory, setStep, reset, setField } = useArtistRegistrationStore();
-  const { setFilters: setArtistFilters, reset: resetArtistFilters } = useArtistFilterStore();
   const [search, setSearch] = useState("");
 
   const handleCategoryShortcut = (id: number, title: string) => {
@@ -64,20 +62,14 @@ export default function ApplicationPage() {
     [categoryData],
   );
 
-  const filtered = useMemo(() => {
-    let result = artists;
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (a) =>
-          `${a.user.firstName ?? ""} ${a.user.lastName ?? ""}`
-            .toLowerCase()
-            .includes(q) ||
-          a.categories?.some((c) => c.faName.includes(search)),
-      );
-    }
-    return result;
-  }, [artists, search]);
+  // Preview list only — real searching happens on /artists, which filters server-side.
+  const filtered = useMemo(
+    () =>
+      search.trim()
+        ? artists.filter((a) => a.categories?.some((c) => c.faName.includes(search)))
+        : artists,
+    [artists, search],
+  );
 
   return (
     <div className="min-h-screen pb-safe-32">
@@ -108,9 +100,6 @@ export default function ApplicationPage() {
                       </h2>
                       <Link
                         href={slide.ctaLink}
-                        onClick={() => {
-                          if (slide.ctaLink === "/artists") resetArtistFilters();
-                        }}
                         className="inline-flex items-center gap-1.5 rounded-full bg-error-500 px-4 py-2 md:px-6 md:py-3 text-sm md:text-base font-semibold text-zinc-950"
                       >
                         {slide.ctaLabel}
@@ -148,6 +137,11 @@ export default function ApplicationPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && search.trim()) {
+                  router.push(`/artists?search=${encodeURIComponent(search.trim())}`);
+                }
+              }}
               placeholder="جستجوی هنرمندان، دسته‌بندی‌ها..."
               className="w-full rounded-2xl py-3.5 md:py-4 pr-10 pl-4 text-sm md:text-base outline-none focus:ring-1 focus:ring-error-500/60 border border-zinc-700/40 bg-zinc-900/60"
             />
@@ -159,7 +153,7 @@ export default function ApplicationPage() {
           <div className="overflow-x-auto md:overflow-visible scrollbar-hidden pb-1">
             <div className="flex gap-2 w-max md:w-auto md:flex-wrap">
               <button
-                onClick={() => { resetArtistFilters(); router.push("/artists"); }}
+                onClick={() => router.push("/artists")}
                 className="rounded-full px-4 py-2 md:px-5 md:py-2.5 text-xs md:text-sm font-medium transition-colors whitespace-nowrap bg-zinc-800 text-zinc-400 hover:text-zinc-200"
               >
                 همه
@@ -167,11 +161,7 @@ export default function ApplicationPage() {
               {categories.map((cat) => (
                 <button
                   key={cat.id}
-                  onClick={() => {
-                    resetArtistFilters();
-                    setArtistFilters({ categoryId__in: [cat.id] });
-                    router.push("/artists");
-                  }}
+                  onClick={() => router.push(`/artists?category=${cat.id}`)}
                   className="flex flex-col items-start gap-0.5 rounded-2xl px-4 py-2 md:px-5 md:py-2.5 text-xs md:text-sm font-medium transition-colors whitespace-nowrap bg-zinc-800 text-zinc-400 hover:text-zinc-200"
                 >
                   <span>{cat.faName}</span>
@@ -187,18 +177,26 @@ export default function ApplicationPage() {
         )}
 
         <div className="mt-5 md:mt-8 space-y-8 md:space-y-12">
-          {/* Artist Registration — full width blog-card slider */}
-          <section className="-mx-4">
-            <div className="flex items-center justify-between mb-3 md:mb-4 px-4">
-              <h2 className="text-sm md:text-lg font-semibold text-zinc-100">
-                ثبت‌نام هنرمند
-              </h2>
-              <Link href="/profile" className="text-xs md:text-sm text-error-500">
+          {/* Artist Registration — edge-to-edge card slider */}
+          <section className="mx-[calc(50%-50vw)] w-screen">
+            <div className="flex items-end justify-between mb-3 md:mb-6 px-4 md:px-8">
+              <div>
+                <h2 className="text-2xl md:text-4xl font-bold text-zinc-100">
+                  فرم‌های درخواست هنرمندان
+                </h2>
+                <p className="text-xs md:text-sm text-zinc-500 mt-1">
+                  زمینه فعالیت خود را انتخاب کنید و فرم را تکمیل کنید
+                </p>
+              </div>
+              <Link
+                href="/artist-registration"
+                className="text-xs md:text-sm text-error-500 shrink-0"
+              >
                 شروع
               </Link>
             </div>
             <div className="overflow-x-auto scrollbar-hidden">
-              <div className="flex gap-3 md:gap-4 w-max px-4 pb-1">
+              <div className="flex gap-3 md:gap-4 w-max px-4 md:px-8 pb-1">
                 {categories.map((cat) => (
                   <button
                     key={cat.id}
@@ -231,11 +229,7 @@ export default function ApplicationPage() {
           <section>
             <div className="flex items-center justify-between mb-3 md:mb-4">
               <h2 className="text-sm md:text-lg font-semibold text-zinc-100">هنرمندان</h2>
-              <Link
-                href="/artists"
-                onClick={() => resetArtistFilters()}
-                className="text-xs md:text-sm text-error-500"
-              >
+              <Link href="/artists" className="text-xs md:text-sm text-error-500">
                 همه
               </Link>
             </div>
