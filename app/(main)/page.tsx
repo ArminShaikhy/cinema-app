@@ -16,6 +16,9 @@ import { TutorialSection } from "@/components/home/TutorialSection";
 import { MainTutorialVideo } from "@/components/home/MainTutorialVideo";
 import { IArtistItem } from "@/lib/services/admin/type";
 import { useArtistRegistrationStore } from "@/lib/stores/useUserArtist";
+import { useArtistFilterStore } from "@/lib/stores/useArtistFilter";
+import useAuthStore from "@/lib/stores/useAuthStore";
+import useLoginDrawerStore from "@/lib/stores/useLoginDrawerStore";
 
 const BANNER_GRADIENTS = [
   "from-zinc-950 via-amber-950/50 to-zinc-900",
@@ -25,8 +28,13 @@ const BANNER_GRADIENTS = [
 
 export default function ApplicationPage() {
   const router = useRouter();
-  const { setSelectedCategory, setStep, reset, setField } = useArtistRegistrationStore();
+  const { setSelectedCategory, setStep, reset, setField } =
+    useArtistRegistrationStore();
+  const { setFilters: setArtistFilters, reset: resetArtistFilters } =
+    useArtistFilterStore();
   const [search, setSearch] = useState("");
+  const { isLoggedIn } = useAuthStore();
+  const { open } = useLoginDrawerStore();
 
   const handleCategoryShortcut = (id: number, title: string) => {
     reset();
@@ -52,13 +60,15 @@ export default function ApplicationPage() {
 
   const { data: bannerData, isLoading: bannersLoading } = useUserBannerList();
   const banners = useMemo(
-    () => [...(bannerData?.result ?? [])].sort((a, b) => a.priority - b.priority),
+    () =>
+      [...(bannerData?.result ?? [])].sort((a, b) => a.priority - b.priority),
     [bannerData],
   );
 
   const artists = artistData?.result ?? [];
   const categories = useMemo(
-    () => [...(categoryData?.result ?? [])].sort((a, b) => a.priority - b.priority),
+    () =>
+      [...(categoryData?.result ?? [])].sort((a, b) => a.priority - b.priority),
     [categoryData],
   );
 
@@ -100,6 +110,10 @@ export default function ApplicationPage() {
                       </h2>
                       <Link
                         href={slide.ctaLink}
+                        onClick={() => {
+                          if (slide.ctaLink === "/artists")
+                            resetArtistFilters();
+                        }}
                         className="inline-flex items-center gap-1.5 rounded-full bg-error-500 px-4 py-2 md:px-6 md:py-3 text-sm md:text-base font-semibold text-zinc-950"
                       >
                         {slide.ctaLabel}
@@ -107,7 +121,12 @@ export default function ApplicationPage() {
                       </Link>
                     </div>
                     <div className="absolute inset-0 opacity-30 pointer-events-none">
-                      <Image src={slide.image} alt="" fill className="object-cover" />
+                      <Image
+                        src={slide.image}
+                        alt=""
+                        fill
+                        className="object-cover"
+                      />
                     </div>
                   </div>
                 </SwiperSlide>
@@ -123,7 +142,9 @@ export default function ApplicationPage() {
         {/* Header + Search */}
         <div className="pt-5 md:pt-8 pb-3 md:pb-5 space-y-3 md:space-y-4">
           <div>
-            <h1 className="text-xl md:text-3xl font-bold text-zinc-100">کاوش</h1>
+            <h1 className="text-xl md:text-3xl font-bold text-zinc-100">
+              کاوش
+            </h1>
             <p className="text-xs md:text-sm text-zinc-500 mt-0.5 md:mt-1">
               هنرمندان سینما را کشف کنید
             </p>
@@ -153,7 +174,10 @@ export default function ApplicationPage() {
           <div className="overflow-x-auto md:overflow-visible scrollbar-hidden pb-1">
             <div className="flex gap-2 w-max md:w-auto md:flex-wrap">
               <button
-                onClick={() => router.push("/artists")}
+                onClick={() => {
+                  resetArtistFilters();
+                  router.push("/artists");
+                }}
                 className="rounded-full px-4 py-2 md:px-5 md:py-2.5 text-xs md:text-sm font-medium transition-colors whitespace-nowrap bg-zinc-800 text-zinc-400 hover:text-zinc-200"
               >
                 همه
@@ -177,20 +201,15 @@ export default function ApplicationPage() {
         )}
 
         <div className="mt-5 md:mt-8 space-y-8 md:space-y-12">
-          {/* Artist Registration — edge-to-edge card slider */}
-          <section className="mx-[calc(50%-50vw)] w-screen">
-            <div className="flex items-end justify-between mb-3 md:mb-6 px-4 md:px-8">
-              <div>
-                <h2 className="text-2xl md:text-4xl font-bold text-zinc-100">
-                  فرم‌های درخواست هنرمندان
-                </h2>
-                <p className="text-xs md:text-sm text-zinc-500 mt-1">
-                  زمینه فعالیت خود را انتخاب کنید و فرم را تکمیل کنید
-                </p>
-              </div>
+          {/* Artist Registration — full width blog-card slider */}
+          <section className="-mx-4">
+            <div className="flex items-center justify-between mb-3 md:mb-4 px-4">
+              <h2 className="text-sm md:text-lg font-semibold text-zinc-100">
+                ثبت‌نام هنرمند
+              </h2>
               <Link
-                href="/artist-registration"
-                className="text-xs md:text-sm text-error-500 shrink-0"
+                href="/profile"
+                className="text-xs md:text-sm text-error-500"
               >
                 شروع
               </Link>
@@ -200,7 +219,11 @@ export default function ApplicationPage() {
                 {categories.map((cat) => (
                   <button
                     key={cat.id}
-                    onClick={() => handleCategoryShortcut(cat.id, cat.faName)}
+                    onClick={
+                      isLoggedIn
+                        ? () => handleCategoryShortcut(cat.id, cat.faName)
+                        : open
+                    }
                     className="relative overflow-hidden w-40 h-52 md:w-56 md:h-72 shrink-0 rounded-2xl group active:scale-[.98] transition-transform"
                   >
                     <Image
@@ -228,8 +251,14 @@ export default function ApplicationPage() {
           {/* Artist Grid */}
           <section>
             <div className="flex items-center justify-between mb-3 md:mb-4">
-              <h2 className="text-sm md:text-lg font-semibold text-zinc-100">هنرمندان</h2>
-              <Link href="/artists" className="text-xs md:text-sm text-error-500">
+              <h2 className="text-sm md:text-lg font-semibold text-zinc-100">
+                هنرمندان
+              </h2>
+              <Link
+                href="/artists"
+                onClick={() => resetArtistFilters()}
+                className="text-xs md:text-sm text-error-500"
+              >
                 همه
               </Link>
             </div>
@@ -246,7 +275,9 @@ export default function ApplicationPage() {
               className="flex items-center justify-between rounded-2xl border border-zinc-800 bg-zinc-900/60 px-4 py-4 md:px-6 md:py-6 hover:border-error-500/40 transition-colors group active:scale-[.99]"
             >
               <div>
-                <p className="text-sm md:text-base font-semibold text-zinc-100">پشتیبانی</p>
+                <p className="text-sm md:text-base font-semibold text-zinc-100">
+                  پشتیبانی
+                </p>
                 <p className="text-xs md:text-sm text-zinc-500 mt-0.5 md:mt-1">
                   با تیم ما در ارتباط باشید
                 </p>
@@ -384,7 +415,9 @@ function ArtistCard({ artist }: { artist: IArtistItem }) {
           </span>
         )}
         {typeof artist.answers?.city === "string" && artist.answers.city && (
-          <span className="text-xs md:text-sm text-zinc-600">{artist.answers.city as string}</span>
+          <span className="text-xs md:text-sm text-zinc-600">
+            {artist.answers.city as string}
+          </span>
         )}
       </div>
     </Link>
