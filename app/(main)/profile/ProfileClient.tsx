@@ -14,6 +14,7 @@ import type { LandingCopyKey } from "@/lib/constants/landingCopy";
 const sectionLabelKeys: Record<SectionId, LandingCopyKey> = {
   overview: "profileOverviewTitle",
   forms: "profileFormsTitle",
+  messages: "profileMessagesTitle",
   requests: "profileRequestsTabTitle",
   payments: "profilePaymentsTitle",
   wallet: "profileWalletTitle",
