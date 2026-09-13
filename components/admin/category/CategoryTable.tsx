@@ -21,9 +21,8 @@ function CategoryTable() {
     useCategoryListParams();
 
   // ponytail: server-side search on /admin/categories is unreliable, so fetch the
-  // whole list (backend caps count at 100) and search/filter/paginate client-side.
-  // Move back to server params if categories ever exceed 100.
-  const { data, isPending } = useAdminCategoryList({ page: 1, count: 100 });
+  // whole list (all pages) and search/filter/paginate client-side.
+  const { data, isPending } = useAdminCategoryList();
 
   const query = (params.search ?? "").trim().toLowerCase();
   const filtered = (data?.result ?? []).filter((item) => {
