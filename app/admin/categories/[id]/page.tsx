@@ -6,6 +6,7 @@ import {
   useAdminUploadBannerImage,
 } from "@/lib/services/admin/hook";
 import withNoSSR from "@/lib/utils/withNoSSR";
+import { toStoragePath } from "@/lib/utils/toStoragePath";
 import { Button, Card, Divider, Switch } from "@dgshahr/ui-kit";
 import Input from "@/components/common/Input";
 import FileUploader, { FileType } from "@dgshahr/ui-kit/Form/FileUploader";
@@ -47,7 +48,7 @@ function CategoryDetail() {
     setDescription(data.description ?? "");
     setIsActive(data.isActive);
     setPriority(data.priority);
-    setImagePath(data.image ?? "");
+    setImagePath(toStoragePath(data.image ?? ""));
     setImageFile(data.image ? { src: data.image } : null);
     setContactAmount(
       data.contactAmount === null || data.contactAmount === undefined
