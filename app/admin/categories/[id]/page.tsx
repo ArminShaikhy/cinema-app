@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 import {
   useAdminCategoryList,
+  useAdminCategoryReorder,
   useAdminCategoryRetrieve,
   useAdminCategoryUpdate,
   useAdminUploadBannerImage,
@@ -10,6 +11,7 @@ import {
 import withNoSSR from "@/lib/utils/withNoSSR";
 import { toStoragePath } from "@/lib/utils/toStoragePath";
 import { sortByPriority } from "@/lib/utils/sortByPriority";
+import { toPriority } from "@/lib/utils/toEnglishDigits";
 import { moved } from "@/components/admin/page-builder/CategoryOrderList";
 import { Badge, Button, Card, Divider, Select, Switch } from "@dgshahr/ui-kit";
 import Input from "@/components/common/Input";
@@ -137,24 +139,17 @@ function CategoryDetail() {
     ? `استفاده از مبلغ دسته‌بندی اصلی${parentName ? ` «${parentName}»` : ""} و در نبودِ آن، مبلغ پیش‌فرض.`
     : "استفاده از مبلغ پیش‌فرض.";
 
-  const { mutateAsync: updateSubcategory } = useAdminCategoryUpdate();
+  const { mutateAsync: reorderCategories } = useAdminCategoryReorder();
 
-  /** Writes `priority = index` back to every subcategory whose position changed.
-   *  Comparing against `priority` (not the old index) also normalizes the nulls rows
-   *  carry from before subcategories became orderable. */
+  /** Sends the whole subcategory list in one call — the server sets `priority` to each
+   *  id's 1-based position. One request per drag, never one per row: the single-category PATCH
+   *  shifts the siblings around the moved row, which only lands right for one move. */
   const reorderSubcategories = async (nextIds: number[]) => {
     setSubOrder(nextIds);
     setSavingOrder(true);
-    const byId = new Map(siblings.map((c) => [c.id, c]));
 
     try {
-      await Promise.all(
-        nextIds.flatMap((subId, index) =>
-          byId.get(subId)?.priority === index
-            ? []
-            : [updateSubcategory({ id: subId, payload: { priority: index } })],
-        ),
-      );
+      await reorderCategories({ parentId: id, ids: nextIds });
       await queryClient.invalidateQueries({ queryKey: ["categoryList"] });
       queryClient.invalidateQueries({ queryKey: ["applicationCategories"] });
       setSubOrder(null);
@@ -194,7 +189,8 @@ function CategoryDetail() {
           isActive,
           description,
           ...(parentChanged && { parentId }),
-          priority,
+          // Only a changed priority moves the row; saving other fields leaves the order alone.
+          ...(priority !== data?.priority && { priority }),
           image: imagePath || null,
           // An empty field means "not set" (inherit / fall back); a typed 0 means free.
           contactAmount: contactAmount === "" ? null : Number(contactAmount),
@@ -316,11 +312,8 @@ function CategoryDetail() {
                 value={priority ?? ""}
                 type="text"
                 inputMode="numeric"
-                onChange={(e) =>
-                  setPriority(
-                    e.target.value === "" ? null : Number(e.target.value),
-                  )
-                }
+                // Category positions are 1-based; 0 / invalid input clears the field.
+                onChange={(e) => setPriority(toPriority(e.target.value) || null)}
               />
               <div className="flex flex-col gap-3">
                 <p className="font-p1-regular text-gray-500">
